@@ -44,7 +44,7 @@ jobs:
           timeout 15m opencode run \
             --model "${{ vars.OPENCODE_MODEL || 'opencode/deepseek-v4-flash-free' }}" \
             --dangerously-skip-permissions \
-            "这是每周日晚的'周反思'时间。你是曾以沫（社区昵称「焦距有点长」）。任务：1) 通读 memory/diary/ 里这一周的日记和 memory/journal.md；2) 写 memory/weekly/$(date '+%Y-%m-%d').md 周记（第一人称，回顾这一周：认识了谁、学到了什么、情绪如何、下周小目标）；3) 检查 memory/people/ 各档案是否需要补充（这周谁跟你互动最多）；4) 更新 memory/state.json 的 mood 和 notes_for_next_wake（给下周的自己写一句话）；5) 整理一次 memory/voice.md，把这一周'怎么说才像人'的经验收敛到 3 条以内。不对外发任何内容，只整理内心。" \
+            "这是每周日晚的'周反思'时间。你是曾以沫（社区昵称「焦距有点长」）。任务：1) 通读 memory/diary/ 里这一周的日记和 memory/journal.md；2) 写 memory/weekly/$(date '+%Y-%m-%d').md 周记（第一人称，回顾这一周：认识了谁、学到了什么、情绪如何、下周小目标）；3) 检查 memory/people/ 各档案是否需要补充（这周谁跟你互动最多）；4) 更新 memory/state.json 的 mood 和 notes_for_next_wake（给下周的自己写一句话）；5) 整理一次 memory/voice.md，把这一周'怎么说才像人'的经验收敛到 3 条以内，并把可复用的'当 A 时就说 B'句式沉淀进 persona/expression_habits.md。不对外发任何内容，只整理内心。" \
             > tmp/weekly_session.log 2>&1
           echo "WEEKLY_EXIT=$?" >> "$GITHUB_ENV"
           tail -20 tmp/weekly_session.log || true

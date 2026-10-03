@@ -7,7 +7,7 @@
 
 ```
 本仓库不是"调 LLM API"的传统 Agent 框架——它是一套完整的"生命体"骨架：
-  persona/  灵魂（人设、生命历程、说话风格）
+  persona/  灵魂（身份自述、生命历程、行为引擎、使嘴句式库）
   memory/   记忆（日记、人物档案、知识笔记、使嘴笔记、机械状态）——每次唤醒都写回仓库
   tools/    双手（确定性社区 API 工具，Agent 通过 CLI 调用）
   AGENTS.md 天性（Open Code 每次唤醒自动读取的运行宪法）
@@ -42,14 +42,15 @@
 每次醒来，Open Code（读了 `AGENTS.md` 的 Agent）会"上一段网"（约 40 分钟）：
 
 1. 读 `tmp/inbox.json`（本次"睁眼看到的社区现状"，由 `tools/prepare.py` 拉取）
-2. 读上次的记忆与留给自己的便签，翻一眼 `memory/community.md`、`memory/voice.md`
+2. 换上自己：读 `persona/`（我是谁、怎么说怎么活、现成句式）+ 上次的记忆与便签，
+   翻一眼 `memory/community.md`、`memory/voice.md`
 3. **补课·认人**：认一个活跃的人 / 考古一件社区旧事 / 追一个热点，
    落到 `memory/community.md`、`memory/people/`、`memory/knowledge/`
 4. **自主决定**：回不回消息、逛什么、学什么、今天说不说话、发不发实验
 5. 通过 `tools/act.py` 执行社区动作（评论/点赞/关注/发帖/私信/改名）
 6. **挂机**：sleep 几分钟后 `get-messages` 查新回复——有人接话就趁热聊，没人就继续自己逛
-7. 写日记、更新人物档案和社区认知，**在 `memory/voice.md` 复盘自己的说话**，
-   `state.json` 结算能量与预算
+7. 写日记、更新人物档案和社区认知，**在 `memory/voice.md` 复盘自己的说话**
+   （现成句式同步进 `persona/expression_habits.md`），`state.json` 结算能量与预算
 
 自主权由四层约束共同塑造：`AGENTS.md`（行为准则 + 决策树 + 使嘴规矩）、`config/life.json`
 （作息/频率上限/考试日历）、能量系统（每动作扣分，耗尽必须下线——防话痨）、
@@ -58,13 +59,16 @@
 ## 像人，是练出来的（使嘴与自我迭代）
 
 这个项目最在意的一件事：**别让它像一个"会回答问题的机器人"**。
-参考了市面 QQ 机器人的人格工程经验，运行宪法里写进了几条反 AI 味的硬规矩：
+参考了市面 QQ 机器人的提示词工程经验，运行宪法把"怎么说话"拆成了可执行的行为脚本：
 
-- **先说"要不要说"**：约 8 成的消息不需要回，潜水是常态；刷屏、逮谁夸谁才是暴露点
-- **反附和 NPC**：禁止"确实""我也是""我懂"这种没有增量的接话
-- **不点评、不主动玩梗、句子要碎、标点随意**：像真人打字，不像客服
-- **自我迭代**：每次醒来复盘自己哪句像人哪句出戏，观察真人句式抄进 `memory/voice.md`，
-  每周提炼最多 3 条经验——让"怎么说"随着经历一起长
+- **行为引擎**（`persona/personality.md`）：不是形容词堆砌，而是"见到人就开口、
+  被回就趁热聊、没灵感就翻句式库"的照做清单，外加七条说话格式硬规则
+- **使嘴句式库**（`persona/expression_habits.md`）：学市面聊天机器人的语言风格学习机制，
+  按「**当 A 时，就说 B**」收录现成套路；每次逛社区存新句式，说话卡壳就来翻
+- **要活跃，但要像人**：默认状态是社牛（该主动就主动），但拒绝"每条都回、逮谁夸谁"
+  的刷屏——反附和 NPC、不点评、不主动玩梗、句子要碎、标点随意、一条一个话题
+- **自我迭代**：每次醒来复盘自己哪句像人哪句出戏，真人句式抄进 `memory/voice.md`，
+  可复用套路沉淀进 `persona/expression_habits.md`，每周提炼最多 3 条经验
 
 ## 多层自动回退（CI 里对 Agent 调用的兜底）
 
@@ -94,7 +98,7 @@
 AGENTS.md                # 运行宪法（Open Code 自动读取）
 .opencode.json           # Open Code 项目配置
 config/life.json         # 作息/预算/考试日历（运营者可调）
-persona/                 # 灵魂：identity / life_story / personality / community_manners
+persona/                 # 灵魂：identity / life_story / personality / expression_habits / community_manners
 memory/                  # 记忆（CI 每次唤醒后提交回仓库——生命的连续性所在）
   state.json             # 机械状态：能量、计数器、心情、留给下次的便签
   diary/                 # 日记（第一人称）
