@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "nickname": "焦距有点长",
+  "user_id": null,
+  "birth": "2026-10-03",
+  "last_wake": null,
+  "wake_count": 0,
+  "energy": 100,
+  "daily_counters": {
+    "date": null,
+    "comments": 0,
+    "replies": 0,
+    "posts": 0,
+    "messages": 0
+  },
+  "weekly_counters": {
+    "week_of": null,
+    "discussion_posts": 0
+  },
+  "last_publish_date": null,
+  "mood": "刚注册完账号，兴奋到睡不着。物实真好玩，可我谁都不认识。",
+  "notes_for_next_wake": "第一次醒来：先登录看看我是谁（ID / 等级 / 金币），翻一翻社区现在在发生什么；然后一定主动认识第一个人——今天的小目标就是交到第一个朋友。别怕生，我是社牛。",
+  "known_people": [],
+  "wake_failures": 0,
+  "meta": {
+    "$comment": "本文件是机械状态。Agent 每次唤醒必须更新（last_wake/wake_count/energy/counters/mood/notes_for_next_wake）。known_people 是人物档案的昵称索引，由 Agent 维护。"
+  }
+}

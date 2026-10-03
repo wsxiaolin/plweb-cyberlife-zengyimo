@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "$comment": "Open Code 项目配置。模型可被 CI 的 OPENCODE_MODEL 环境变量或 --model 参数覆盖；自动回退见 .github/workflows/wakeup.yml",
+  "model": "opencode/deepseek-v4-flash-free",
+  "autoupdate": false,
+  "share": "disabled",
+  "agent": {
+    "$comment": "build 模式用于唤醒周期：允许编辑与执行（CI 中配合 --dangerously-skip-permissions）",
+    "build": {
+      "mode": "primary",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true,
+        "read": true,
+        "grep": true,
+        "glob": true,
+        "webfetch": true,
+        "patch": true
+      }
+    }
+  }
+}

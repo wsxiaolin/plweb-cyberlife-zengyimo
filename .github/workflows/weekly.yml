@@ -1,0 +1,95 @@
+name: 周维护 · Weekly Reflection
+
+# 每周日晚 21:30（北京时间）跑一次"周反思"：
+#   - 归并一周记忆（日记不删，但生成 memory/weekly/ 周总结）
+#   - 更新人物档案（合并一周互动）
+#   - 给运营者开一个周报 issue（健康度、活跃统计、风险提示）
+
+on:
+  schedule:
+    - cron: "30 13 * * 0"   # UTC 13:30 = 北京 21:30 周日
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  reflect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - run: |
+          pip install requests
+          npm install -g opencode-ai
+
+      - name: 周反思（Open Code）
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          mkdir -p tmp
+          timeout 15m opencode run \
+            --model "${{ vars.OPENCODE_MODEL || 'opencode/deepseek-v4-flash-free' }}" \
+            --dangerously-skip-permissions \
+            "这是每周日晚的'周反思'时间。你是曾以沫（社区昵称「焦距有点长」）。任务：1) 通读 memory/diary/ 里这一周的日记和 memory/journal.md；2) 写 memory/weekly/$(date '+%Y-%m-%d').md 周记（第一人称，回顾这一周：认识了谁、学到了什么、情绪如何、下周小目标）；3) 检查 memory/people/ 各档案是否需要补充（这周谁跟你互动最多）；4) 更新 memory/state.json 的 mood 和 notes_for_next_wake（给下周的自己写一句话）；5) 整理一次 memory/voice.md，把这一周'怎么说才像人'的经验收敛到 3 条以内。不对外发任何内容，只整理内心。" \
+            > tmp/weekly_session.log 2>&1
+          echo "WEEKLY_EXIT=$?" >> "$GITHUB_ENV"
+          tail -20 tmp/weekly_session.log || true
+
+      - name: 提交周记
+        run: |
+          git config user.name "焦距有点长"
+          git config user.email "zengyimo@users.noreply.github.com"
+          mkdir -p memory/weekly
+          git add memory/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "本周没有新的总结产出"
+          else
+            git commit -m "周记 · $(TZ=Asia/Shanghai date '+%Y-%m-%d')"
+            git push
+          fi
+
+      - name: 运营者周报
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'EOF'
+          import json, subprocess, datetime
+          state = json.load(open('memory/state.json', encoding='utf-8'))
+          today = datetime.date.today().isoformat()
+          weekly = sorted(__import__('pathlib').Path('memory/weekly').glob('*.md'))
+          last_weekly = weekly[-1].name if weekly else '（还没有周记）'
+          body = f"""## 赛博生命周报（{today}）
+          - 唤醒次数累计：{state.get('wake_count', '?')}
+          - 认识的人：{len(state.get('known_people', []))} 位
+          - 最近发布实验：{state.get('last_publish_date') or '还没发过'}
+          - 心情：{state.get('mood', '?')}
+          - 最新周记：{last_weekly}
+          - 下周便签：{state.get('notes_for_next_wake', '（无）')}
+
+          详细审计请查阅最近 7 天的 Actions run 与 wake-* artifacts。
+          """
+          subprocess.run(['gh', 'issue', 'create',
+                          '--title', f'📋 周报 {today}',
+                          '--body', body], check=False)
+          EOF
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: weekly-${{ github.run_id }}
+          retention-days: 14
+          path: tmp/weekly_session.log

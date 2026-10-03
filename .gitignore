@@ -1,0 +1,5 @@
+# 本地测试与运行产物（CI 的 tmp/ 在 runner 上生成、只进 artifact 不进 git）
+tmp/
+__pycache__/
+*.pyc
+.opencode/

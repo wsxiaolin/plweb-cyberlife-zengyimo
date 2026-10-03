@@ -1,0 +1,264 @@
+name: 唤醒 · Wake
+
+# 赛博生命的"生物钟"。时间均为北京时间（cron 用 UTC，北京=UTC+8）。
+# 全部槽位每天都会触发，由"作息门卫"（tools/schedule_gate.py）判定今天该开哪组：
+#   上学日（周一~周五，且非法定节假日/寒暑假）4 醒：
+#     07:00 上学前          -> 0  23 * * * (UTC 前一天)
+#     12:30 午休            -> 30 4  * * *   (与自由日午间共用同一 cron)
+#     17:30 放学后          -> 30 9  * * *
+#     21:30 睡前            -> 30 13 * * *
+#   自由日（周末 / 法定节假日 / 寒暑假）8 醒，08:30~22:30 每 2 小时一槽：
+#     08:30 / 10:30 / 12:30 / 14:30 / 16:30 / 18:30 / 20:30 / 22:30
+#                           -> 30 0 / 30 2 / 30 4 / 30 6 / 30 8 / 30 10 / 30 12 / 30 14 * * *
+#   调休补班的周末会被 API 识别为上学日；手动唤醒（workflow_dispatch）不受门卫限制。
+# GitHub cron 本身有几分钟到几十分钟的随机延迟，天然形成"人味抖动"；门卫容差 ±100 分钟。
+# 改作息：config/life.json 的 wake_slots 与这里的 cron 要同步改。
+#
+# 模型自动回退：主模型唤醒失败/超时后，按 OPENCODE_MODEL_FALLBACKS 名单逐个换模型重跑
+# 同一段完整人生（任务不简化）。每个模型有独立超时、整段活动有总预算，杜绝"卡死在回退步骤"。
+
+on:
+  schedule:
+    - cron: "30 0 * * *"
+    - cron: "30 2 * * *"
+    - cron: "30 4 * * *"
+    - cron: "30 6 * * *"
+    - cron: "30 8 * * *"
+    - cron: "30 10 * * *"
+    - cron: "30 12 * * *"
+    - cron: "30 14 * * *"
+    - cron: "0 23 * * *"
+    - cron: "30 9 * * *"
+    - cron: "30 13 * * *"
+  workflow_dispatch:
+    inputs:
+      trigger_note:
+        description: "手动唤醒原因（会写进提示词，如 '运营者手动唤醒'）"
+        default: "运营者手动唤醒"
+      model_override:
+        description: "覆盖本次模型（如 opencode/big-pickle），留空用默认"
+        default: ""
+
+concurrency:
+  group: wakeup
+  cancel-in-progress: false   # 排队不取消：一次只醒一个
+
+permissions:
+  contents: write   # 提交记忆回仓库
+  issues: write     # 唤醒异常时自动开 issue 告警
+  actions: write    # 作息门卫可取消"不该醒"的运行
+
+env:
+  TZ: Asia/Shanghai
+  # 主模型可被 repo variable OPENCODE_MODEL / 手动输入覆盖；默认免费模型（plweb2 同款）
+  OPENCODE_MODEL_DEFAULT: opencode/deepseek-v4-flash-free
+  # 有序回退名单：主模型失败/超时后按顺序逐个尝试，直到有一个跑完。
+  # 免费模型下线、限流或"连上不响应"都算失败；每个模型有独立超时（见下方 PER_MODEL_TIMEOUT），
+  # 整段 Agent 活动还有总预算（TOTAL_BUDGET），单个卡死的模型不会拖垮整次唤醒。
+  # 名单会与主模型去重。模型可用性常变时，只改这一处即可。
+  OPENCODE_MODEL_FALLBACKS: >-
+    opencode/muse-spark-1.3-contributor-free
+    opencode/big-pickle
+    opencode/deepseek-v4-flash-free
+    opencode/mimo-v2.5-free
+    opencode/mimo-v2.6-flash-free
+    opencode/nemotron-3-ultra-free
+    opencode/ling-3.0-flash-fin-free
+    opencode/nemotron-3.5-lightning-free
+    opencode/muse-spark-1.2-contributor-free
+
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: 检出仓库（含全部记忆）
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: 作息门卫（现在该醒吗？）
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          GATE="$(python3 tools/schedule_gate.py --event "${{ github.event_name }}")"
+          GATE_RC=$?
+          echo "$GATE"
+          if [ "$GATE_RC" != "0" ]; then
+            echo "::warning::作息门卫脚本异常（rc=$GATE_RC），按原逻辑放行唤醒"
+            exit 0
+          fi
+          OPEN="$(printf '%s' "$GATE" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("open"))' 2>/dev/null)"
+          if [ "$OPEN" = "False" ]; then
+            echo "::notice::作息门卫：现在不该醒（详见上方 JSON），本次运行取消，不算失败"
+            if ! gh run cancel "${{ github.run_id }}"; then
+              echo "::error::作息门卫判定不该醒，但取消运行失败——直接终止本次唤醒"
+              exit 1
+            fi
+            sleep 30
+          fi
+
+      - name: 安装 Python 3.14 与依赖
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: pip install -r tools/requirements.txt
+
+      - name: 安装 Open Code CLI
+        run: npm install -g opencode-ai
+
+      - name: 睁眼 · 拉取社区动态（prepare）
+        env:
+          PLWEB_EMAIL: ${{ secrets.PLWEB_EMAIL }}
+          PLWEB_PASSWORD: ${{ secrets.PLWEB_PASSWORD }}
+        run: |
+          set +e
+          python tools/prepare.py --browse-pages 2
+          echo "PREPARE_EXIT=$?" >> "$GITHUB_ENV"
+          set -e
+          # 登录失败(2)：跳过 Agent，直接走 finalize 写"断网日"日记（回退策略 L1）
+          if [ "${PREPARE_EXIT}" = "2" ]; then
+            echo "::warning::社区登录失败，本次唤醒降级为离线日记模式"
+          fi
+
+      - name: 模型选择
+        run: |
+          # 主模型优先级：手动覆盖 > repo variable > 默认
+          if [ -n "${{ github.event.inputs.model_override }}" ]; then
+            PRIMARY="${{ github.event.inputs.model_override }}"
+            # 手动指定模型多用于排障：只信任用户给的这一个，不自动扩散到名单
+            CANDIDATES="$PRIMARY"
+          elif [ -n "${{ vars.OPENCODE_MODEL }}" ]; then
+            PRIMARY="${{ vars.OPENCODE_MODEL }}"
+            CANDIDATES="$PRIMARY ${OPENCODE_MODEL_FALLBACKS}"
+          else
+            PRIMARY="${OPENCODE_MODEL_DEFAULT}"
+            CANDIDATES="$PRIMARY ${OPENCODE_MODEL_FALLBACKS}"
+          fi
+          echo "MODEL=${PRIMARY}" >> "$GITHUB_ENV"
+          echo "MODEL_CANDIDATES=${CANDIDATES}" >> "$GITHUB_ENV"
+          echo "本次模型候选：${CANDIDATES}"
+
+      - name: 生活 · Open Code 唤醒（主模型 + 有序回退）
+        if: env.PREPARE_EXIT == '0'
+        env:
+          # 运营者若有自有模型密钥，填入 repo secrets 即可透传给 opencode
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          set +e
+          TRIGGER="${{ github.event_name }}"
+          [ "$TRIGGER" = "workflow_dispatch" ] && TRIGGER="手动唤醒（${{ github.event.inputs.trigger_note }}）"
+          python3 - "$TRIGGER" <<'PY' > tmp/wake_prompt.txt
+          import sys, datetime
+          now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
+          tpl = open("prompts/wakeup.md", encoding="utf-8").read()
+          tpl = tpl.replace("{DATE}", now.strftime("%Y-%m-%d"))
+          tpl = tpl.replace("{TIME}", now.strftime("%H:%M"))
+          tpl = tpl.replace("{TRIGGER}", sys.argv[1])
+          sys.stdout.write(tpl)
+          PY
+
+          # 候选去重，主模型排最前
+          DEDUPED=""
+          for m in ${MODEL_CANDIDATES}; do
+            case " ${DEDUPED} " in
+              *" ${m} "*) ;;
+              *) DEDUPED="${DEDUPED} ${m}" ;;
+            esac
+          done
+
+          # 单模型上限 8 分钟（健康唤醒通常 2~3 分钟，留足余量）；
+          # 整段 Agent 活动总预算 45 分钟：job timeout 60 分钟，给 finalize/commit/artifact 留余量。
+          # 关键：任何模型超时都会被 timeout 终止并换下一个，不会再出现"卡在回退步骤直到 job 被杀"。
+          PER_MODEL_TIMEOUT=480
+          TOTAL_BUDGET=2700
+          STARTED=$(date +%s)
+          ATTEMPT=0
+          AGENT_EXIT=1
+          MODEL_USED=""
+
+          for M in ${DEDUPED}; do
+            ELAPSED=$(( $(date +%s) - STARTED ))
+            REMAIN=$(( TOTAL_BUDGET - ELAPSED ))
+            if [ "$REMAIN" -le 60 ]; then
+              echo "::warning::Agent 总预算只剩 ${REMAIN}s，停止尝试新模型"
+              break
+            fi
+            ATTEMPT=$((ATTEMPT + 1))
+            TRY_TIMEOUT=$PER_MODEL_TIMEOUT
+            [ "$TRY_TIMEOUT" -gt "$REMAIN" ] && TRY_TIMEOUT=$REMAIN
+            LOG="tmp/agent_attempt_${ATTEMPT}.log"
+            echo "::notice::第 ${ATTEMPT} 次尝试 · ${M}（本模型上限 ${TRY_TIMEOUT}s / 剩余总预算 ${REMAIN}s）"
+            timeout "${TRY_TIMEOUT}s" opencode run \
+              --model "$M" \
+              --dangerously-skip-permissions \
+              "$(cat tmp/wake_prompt.txt)" \
+              > "$LOG" 2>&1
+            AGENT_EXIT=$?
+            MODEL_USED="$M"
+            echo "模型 ${M} 退出码：${AGENT_EXIT}"
+            tail -30 "$LOG" || true
+            if [ "$AGENT_EXIT" -eq 0 ]; then
+              echo "::notice::模型 ${M} 完成本次唤醒"
+              break
+            fi
+            if [ "$AGENT_EXIT" -eq 124 ]; then
+              echo "::warning::模型 ${M} 超时（${TRY_TIMEOUT}s）被终止，自动换下一个"
+            else
+              echo "::warning::模型 ${M} 失败（exit=${AGENT_EXIT}），自动换下一个"
+            fi
+          done
+
+          echo "AGENT_EXIT=${AGENT_EXIT}" >> "$GITHUB_ENV"
+          echo "MODEL_USED=${MODEL_USED}" >> "$GITHUB_ENV"
+          echo "AGENT_ATTEMPTS=${ATTEMPT}" >> "$GITHUB_ENV"
+          set -e
+
+      - name: 收尾 · 校验与自动修复（finalize）
+        run: |
+          set +e
+          python tools/finalize.py --agent-exit "${AGENT_EXIT:-2}"
+          echo "FINALIZE_EXIT=$?" >> "$GITHUB_ENV"
+          set -e
+          cat tmp/wake_report.json || true
+
+      - name: 提交记忆回仓库
+        run: |
+          git config user.name "焦距有点长"
+          git config user.email "zengyimo@users.noreply.github.com"
+          git add memory/ persona/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "本次唤醒没有记忆变化（沉默的一天也是一天）"
+          else
+            git commit -m "记忆 · $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M') 醒过一次"
+            git push
+          fi
+
+      - name: 异常告警（连续失败开 issue）
+        if: env.FINALIZE_EXIT == '3'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "🤒 唤醒异常 $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')" \
+            --body "finalize 判定为严重失败（fatal）。查看 run 日志与 wake_report.json。若连续多次失败，请检查：1) 社区账号凭据 2) 模型可用性 3) prepare 的 errors 字段。" \
+            --label "wake-failure" || echo "issue 创建失败（可能 label 不存在，忽略）"
+
+      - name: 归档审计材料
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wake-${{ github.run_id }}
+          retention-days: 7
+          path: |
+            tmp/inbox.json
+            tmp/actions.log
+            tmp/wake_report.json
+            tmp/wake_prompt.txt
+            tmp/agent_attempt_*.log
