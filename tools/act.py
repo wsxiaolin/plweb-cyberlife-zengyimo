@@ -154,7 +154,12 @@ def main() -> int:
     p.add_argument("--category", default="Experiment",
                    choices=["Experiment", "Discussion", "User"])
     p.add_argument("--text", required=True)
-    p.add_argument("--reply-to", default=None, help="被回复的评论 ID（楼层回复）")
+    p.add_argument("--reply-to", default=None,
+                   help="被回复的评论 ID（仅备注楼层进动作日志；服务端通知靠 --reply-user）")
+    p.add_argument("--reply-user", default=None, metavar="USER_ID",
+                   help="回复对象用户 ID：自动拼 @ 前缀并填 ReplyID，对方才能收到"
+                        "「有人回复你」通知（plap 语义：ReplyID=被回复人的用户 ID）")
+    p.add_argument("--reply-nick", default=None, help="回复对象昵称（与 --reply-user 配套）")
 
     p = sub.add_parser("remove-comment")
     p.add_argument("--comment-id", required=True)
@@ -240,11 +245,21 @@ def main() -> int:
         client = PlwebClient.from_env()
 
         if args.cmd == "comment":
+            reply_user = None
+            if args.reply_user:
+                if not args.reply_nick:
+                    raise SystemExit("--reply-user 需要 --reply-nick 配套（对方昵称）")
+                reply_user = (args.reply_user, args.reply_nick)
             r = client.post_comment(args.content_id, args.category, args.text,
-                                    reply_to=args.reply_to)
+                                    reply_to=args.reply_to,
+                                    reply_to_user=reply_user)
             result = {"action": "comment", "status": r.get("Status"),
                       "content_id": args.content_id,
                       "comment_id": (r.get("Data") or {}).get("ID")}
+            if args.reply_user:
+                result["reply_to_user"] = args.reply_user
+            if args.reply_to:
+                result["reply_to_comment"] = args.reply_to
         elif args.cmd == "remove-comment":
             r = client.remove_comment(args.comment_id, args.category)
             result = {"action": "remove-comment", "status": r.get("Status"),

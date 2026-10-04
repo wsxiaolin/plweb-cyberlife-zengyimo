@@ -331,23 +331,53 @@ class PlwebClient:
     # ---------- 互动类（写操作，自动记动作日志） ----------
 
     def post_comment(self, content_id: str, category: str, text: str,
-                     reply_to: Optional[str] = None) -> dict:
+                     reply_to: Optional[str] = None,
+                     reply_to_user: Optional[tuple] = None) -> dict:
         """发评论。走 Messages/PostComment（Contents/PostComment 会使服务端挂起）。
-        content_id：作品列表的 ID 字段（summary ID）；reply_to：被回复的评论 ID（可选）。"""
+        content_id：作品列表的 ID 字段（summary ID）；reply_to：被回复的评论 ID
+        （可选，仅记入动作日志备注楼层，不会发给服务端）。
+
+        reply_to_user：(用户 ID, 昵称) 元组。回复别人时**必须**提供——
+        1) 自动在正文前拼 `回复<user=ID>@昵称</user>: ` 前缀（服务端解析出
+           Mentions 提及列表）；
+        2) 把请求体的 ReplyID 填成对方用户 ID（plap 语义：ReplyID = 被回复人的
+           用户 ID，不是评论 ID）。
+
+        服务端两组件缺一不可（2026-10-03 源码核实：
+        Physics-Lab-Turtle-Services Quantum Logics/Logics/CommentLogic.cs
+        PostCommentAsync）：`ReplyID` 非空**且**出现在 Mentions 里才发
+        "Comment-Replied"（有人回复了你）站内信；只带 @ 前缀不填 ReplyID，
+        对方只会收到 "Comment-At-Comment"（被@）；两者都没有，除楼主收到
+        普通评论通知外谁也不知道你说过话。
+
+        2026-10-01 实测（90123 帖评论原文）：真实用户回复格式为
+        `回复<user=669a5574...>@落星如雨</user>: 正文`，通知的 Fields.Content
+        会把富文本标记剥成 `回复@落星如雨: 正文`。"""
+        reply_id = None
+        if reply_to_user:
+            uid, nick = reply_to_user[0], reply_to_user[1]
+            if not text.startswith(("回复<user=", "@")):
+                text = f"回复<user={uid}>@{nick}</user>: {text}"
+            reply_id = uid
         payload = self._post(
             "Messages/PostComment",
             {
                 "TargetID": content_id,
                 "TargetType": category,
                 "Language": "Chinese",
-                "ReplyID": reply_to,
+                "ReplyID": reply_id,
                 "Content": text,
                 "Special": None,
             },
         )
         if self.log_actions:
-            _log_action({"action": "comment", "content_id": content_id,
-                         "category": category, "text": text})
+            entry = {"action": "comment", "content_id": content_id,
+                     "category": category, "text": text}
+            if reply_id:
+                entry["reply_to_user"] = reply_id
+            if reply_to:
+                entry["reply_to_comment"] = reply_to
+            _log_action(entry)
         return payload
 
     def remove_comment(self, comment_id: str, category: str) -> dict:
