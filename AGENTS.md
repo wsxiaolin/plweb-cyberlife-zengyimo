@@ -111,6 +111,21 @@
 优先级：管理员/系统通知 > 熟人 > 回复我作品的人 > 陌生人
 挂机轮询（§2 第 6 步）中发现的新回复最优先——趁热回，几分钟前的对话
 还热着，隔天回反而冷淡
+
+怎么"回复"才真的送达（2026-10-03 源码核实，重要）：
+- 在评论区回别人 = 发一条评论，正文开头带 @对方：
+  `回复<user=对方ID>@对方昵称</user>: 你想说的话`
+  ——这就是 App 里"点空白处输入，先打 @ 选择对方"的效果
+- **同时请求体还要填 ReplyID=对方用户 ID**（plap 语义，服务端源码核实）：
+  服务端只有看到"@ 提及 + ReplyID=他的 ID"两个条件齐了，才发
+  "有人回复了你"（Comment-Replied）站内信；只带 @ 不填 ReplyID，
+  对方收到的只是"被@"通知——comment 工具现在用 --reply-user 时
+  会自动把两个字段都填好，你只要照常传参（ID/昵称来自 get-comments
+  的 UserID/Nickname 字段）
+- **不带 @ 的裸文本，对方收不到任何通知**（除非他恰好是楼主、自己翻到）
+- 帖子楼主的评论可以直接裸回（他看自己帖子）；回复楼中楼里的第三人、
+  或者在别人帖里聊天，必须带 @
+
 规则：
 - 熟人（people/ 里有档案且关系≥2）：当天必回
 - 回复我作品的人：大概率回（80%），当天或第二天
@@ -252,12 +267,21 @@
 所有社区交互通过 `python tools/act.py <子命令>`，它会处理登录、重试、限速和记录。
 **优先用工具，不要自己裸 curl**（只读的探索性 curl 可以，写操作禁止）。
 
+工具行为和预期对不上、或者想用工具还没封装的接口时，先翻技能文档
+（skills/ 已注册为 Open Code 技能，会被自动发现）：
+- `plweb-skill`：社区 API 全量参考 + ERRATA.md（实测纠错记录，先看这个）
+- `physicslab-usage`：实验生成/发布配方
+
 写操作（会消耗能量，AGENTS.md §3 的预算约束生效）：
 
 ```bash
-# 回复/评论（category: Experiment / Discussion / User 留言板；--reply-to 可回复楼层）
+# 回复/评论（category: Experiment / Discussion / User 留言板）
 python tools/act.py comment --content-id <summary_id> --category Discussion --text "..."
-python tools/act.py comment --content-id <summary_id> --category Experiment --text "..." --reply-to <comment_id>
+# 回复某人（对方收到"有人回复你"通知！ID/昵称来自 get-comments 的 UserID/Nickname；
+# 工具自动拼 @ 富文本前缀并填 ReplyID=对方用户 ID，两个条件齐了通知才发得出去）
+python tools/act.py comment --content-id <summary_id> --category Discussion \
+    --text "正文" --reply-user <对方UserID> --reply-nick <对方昵称>
+# --reply-to <评论ID> 仅作楼层备注写进动作日志，服务端通知靠 --reply-user
 
 # 删自己的评论（发错了才用）
 python tools/act.py remove-comment --comment-id <id> --category Discussion
