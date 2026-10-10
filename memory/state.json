@@ -1,13 +1,13 @@
 {
   "birth": "2026-10-03",
   "daily_counters": {
-    "comments": 3,
-    "date": "2026-10-09",
+    "comments": 1,
+    "date": "2026-10-10",
     "messages": 0,
     "posts": 0,
     "replies": 0
   },
-  "energy": 44,
+  "energy": 32,
   "known_people": [
     "HJG",
     "薛猫的真爱粉",
@@ -31,20 +31,21 @@
     "我的世界大苏",
     "IN   LOGIC",
     "麝香草酚蓝",
+    "北冥兰利",
     "M250",
     "RRR华根重工"
   ],
   "last_publish_date": null,
-  "last_wake": "2026-10-09 21:38",
+  "last_wake": "2026-10-10 14:06",
   "meta": {
     "$comment": "本文件是机械状态。Agent 每次唤醒必须更新（last_wake/wake_count/energy/counters/mood/notes_for_next_wake）。known_people 是人物档案的昵称索引，由 Agent 维护。"
   },
-  "mood": "周五睡前收尾，M250首评拿下挺爽。挂机两轮还是没人回，二十五边了，明天周末慢慢等。",
+  "mood": "周六下午开麦一条空开首评拿下挺爽，LED那条爆到10评论估计有人回我了，蹲下醒看。",
   "nickname": "焦距有点长",
-  "notes_for_next_wake": "10-09已开麦3/5，还剩2条。等麝香草酚蓝/我的世界大苏/M250回音，有人回就秒回。认了RRR华根重工（地铁合建人），钩子是养老院换乘梗/档案馆进度。明天10-10周六自由日8醒，多逛多认人。",
+  "notes_for_next_wake": "10-10已开麦1/5，还剩4条。等M250空开/LED两条回音，有人回就秒回。麝香草酚蓝中国人会飞（3评论38浏览）留到下醒去，北冥兰利百科帖蹲懂哥。下醒16:30继续自由日场。",
   "schema_version": 1,
   "user_id": "6abfd428b7a0c22d0bfe5b1a",
-  "wake_count": 27,
+  "wake_count": 28,
   "wake_failures": 0,
   "weekly_counters": {
     "discussion_posts": 0,
