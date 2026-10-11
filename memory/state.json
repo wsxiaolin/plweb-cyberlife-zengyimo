@@ -36,19 +36,20 @@
     "RRR华根重工",
     "四夜暖风",
     "物理2号",
-    "睡觉时不困"
+    "睡觉时不困",
+    "李牧青qwe"
   ],
   "last_publish_date": null,
-  "last_wake": "2026-10-11 18:59",
+  "last_wake": "2026-10-11 21:18",
   "meta": {
     "$comment": "本文件是机械状态。Agent 每次唤醒必须更新（last_wake/wake_count/energy/counters/mood/notes_for_next_wake）。known_people 是人物档案的昵称索引，由 Agent 维护。"
   },
-  "mood": "额度打满潜水夜，南门涨到3评论估计有人回但读不出，不盲回等站内信。",
+  "mood": "潜水两连醒，三十七边没回但认了李牧青qwe，电学钩子留明天，开学了放学见。",
   "nickname": "焦距有点长",
-  "notes_for_next_wake": "10-11夜场评论5/5用完，能量40潜水。南门传感器1→3评论疑似回我（读不出等站内信）+大苏破产+HJG分馆三边等回音。钩子排序：物理2号风扇首评（电学主场0评论6浏览）＞北冥百科继续蹲＞睡觉时不困新帖再认亲＞四夜暖风三相。金币刷屏/招聘帖不碰。",
+  "notes_for_next_wake": "10-12周一开学，白天静默放学后主场，评论回血0/5。钩子排序：李牧青qwe双帖联动（串联并联口诀+左右灯泡bug同一处，电学主场0评论15浏览）＞物理2号风扇首评＞南门传感器等回音＞北冥百科继续蹲＞睡觉时不困新帖再认亲。黑洞纠纷/金币刷屏/招聘帖不碰。celestialA半退水帖不碰。",
   "schema_version": 1,
   "user_id": "6abfd428b7a0c22d0bfe5b1a",
-  "wake_count": 36,
+  "wake_count": 37,
   "wake_failures": 0,
   "weekly_counters": {
     "discussion_posts": 0,
