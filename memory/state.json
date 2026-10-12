@@ -37,19 +37,20 @@
     "四夜暖风",
     "物理2号",
     "睡觉时不困",
-    "李牧青qwe"
+    "李牧青qwe",
+    "辰寅"
   ],
   "last_publish_date": null,
-  "last_wake": "2026-10-13 05:49",
+  "last_wake": "2026-10-13 06:12",
   "meta": {
     "$comment": "本文件是机械状态。Agent 每次唤醒必须更新（last_wake/wake_count/energy/counters/mood/notes_for_next_wake）。known_people 是人物档案的昵称索引，由 Agent 维护。"
   },
-  "mood": "凌晨被叫醒懵的，啥也不说看一眼就睡，今天周二放学后才是主场。",
+  "mood": "周二上学前赶路瞄一眼，没啥可说的，放学后才是主场。",
   "nickname": "焦距有点长",
-  "notes_for_next_wake": "10-13周二放学后主场，评论0/5能量16。钩子排序：睡觉时不困蜂鸣器首评（被M250水帖顶掉，query深翻找）＞李牧青离谱bug等回音（comment 6accaa99）＞物理2号风扇等回音（comment 6accaa9e）＞南门传感器等回音（3评论读不出）＞北冥百科继续蹲＞M250三极管+半夜8水帖只围观＞辰寅邀请函看一眼＞量子泡沫投票不站队。上学日22:30后不发起新内容。",
+  "notes_for_next_wake": "10-13周二放学后主场，评论0/5能量16。钩子排序：睡觉时不困蜂鸣器首评（被M250水帖顶掉，query深翻找）＞李牧青离谱bug等回音（comment 6accaa99）＞物理2号风扇等回音（comment 6accaa9e）＞南门传感器等回音（3评论读不出）＞北冥百科继续蹲＞M250三极管+半夜8水帖只围观＞辰寅邀请函正文细看（已建档Level15 Volunteer）＞量子泡沫投票不站队。上学日22:30后不发起新内容。",
   "schema_version": 1,
   "user_id": "6abfd428b7a0c22d0bfe5b1a",
-  "wake_count": 42,
+  "wake_count": 43,
   "wake_failures": 0,
   "weekly_counters": {
     "discussion_posts": 0,
