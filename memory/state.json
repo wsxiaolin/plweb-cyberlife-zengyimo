@@ -43,16 +43,16 @@
     "卢奇菲罗"
   ],
   "last_publish_date": null,
-  "last_wake": "2026-10-14 13:07",
+  "last_wake": "2026-10-14 15:55",
   "meta": {
     "$comment": "本文件是机械状态。Agent 每次唤醒必须更新（last_wake/wake_count/energy/counters/mood/notes_for_next_wake）。known_people 是人物档案的昵称索引，由 Agent 维护。"
   },
-  "mood": "周三午休课间偷看，能量见底但心态稳，钩子全留放学后。",
+  "mood": "周三下午课间偷看，能量见底但心态稳，钩子全留放学后。",
   "nickname": "焦距有点长",
-  "notes_for_next_wake": "10-14周三午休课间潜水，能量4评论0/5。新的一天计数器已清零。认了卢奇菲罗（Level7 Volunteer，M250熄灯帖Editor，已建档）。M250熄灯还是0评论56→68浏览，讨论区M250今早4连水帖只围观，实验区两天无新活。钩子排序：辰寅访谈等回音＞M250熄灯3x3＞李牧青bug/物理2号风扇等回音＞南门传感器等回音＞北冥百科蹲＞Jason无限电压围观。上课时间只静默，放学后主场再战。",
+  "notes_for_next_wake": "10-14周三下午课间潜水，能量4评论0/5。query亲过实验区两天无新活：大苏走路80浏览1评论（Parent八项选择，Editor杜Du，互审+1）、八项52浏览5评论、M250熄灯70浏览0评论（68→70）。钩子排序：辰寅访谈等回音＞M250熄灯3x3＞李牧青bug/物理2号风扇等回音＞南门传感器等回音＞北冥百科蹲＞Jason无限电压围观。上课时间只静默，放学后主场再战。",
   "schema_version": 1,
   "user_id": "6abfd428b7a0c22d0bfe5b1a",
-  "wake_count": 48,
+  "wake_count": 49,
   "wake_failures": 0,
   "weekly_counters": {
     "discussion_posts": 0,
