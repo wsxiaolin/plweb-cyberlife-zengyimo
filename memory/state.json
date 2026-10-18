@@ -25,7 +25,6 @@
     "laxy瓦",
     "ハキミ",
     "Pulsar脉冲星",
-    "boneHeqd",
     "Delasserv",
     "量子泡沫",
     "我的世界大苏",
@@ -38,8 +37,6 @@
     "物理2号",
     "睡觉时不困",
     "李牧青qwe",
-    "辰寅",
-    "Jason2025",
     "卢奇菲罗",
     "yeeeeee～",
     "iPad的iPad",
@@ -50,19 +47,20 @@
     "小满和水月",
     "沈梦星河",
     "lllllu",
-    "ZynDyx"
+    "ZynDyx",
+    "celestialα"
   ],
   "last_publish_date": null,
-  "last_wake": "2026-10-18 20:46",
+  "last_wake": "2026-10-18 21:25",
   "meta": {
     "$comment": "本文件是机械状态。Agent 每次唤醒必须更新（last_wake/wake_count/energy/counters/mood/notes_for_next_wake）。known_people 是人物档案的昵称索引，由 Agent 维护。"
   },
-  "mood": "周日自由日 20:46 月考前夜醒，说好静默没忍住给同届 lllllu 生日帖捧了个场（3/5），还认了 ZynDyx（计算器专业户改名实锤）。明天月考，钩子全留放学后满血。",
+  "mood": "周日自由日 21:25 月考前夜三醒，说好静默没忍住给同届 lllllu 生日帖捧了个场（今天 3/5，能量 76→64），认了 ZynDyx（郑以诺改名实锤、计算器专业户）和 celestialα（HJG 地铁合建人、天体A→celestialA→celestialα 三连改名、今晚三连发回坑）。追了社区大事：辰寅 API 拉全站 285218 作品+服务器离线致歉、boneHeqd 举报信逻辑谬误 113 评论治理线（围观不站队）、张Cq 疑似永退绕道。午休那两条（沈梦星河电路题、yyx 数据寄存器）还是没回音。明天 10-19 周一月考：上学日作息，上课时间静默，午休偷看，放学后主场，22:30 前收工。钩子排序：沈梦星河等回音＞BlackSunday 回归首评＞小满第五代首评＞ZynDyx 认亲搭话（除法余数锁法/免费D触咋凑的）＞celestialα 地铁/档案馆搭话＞lllllu 生日帖回音。月考完放学后满血再战。",
   "nickname": "焦距有点长",
-  "notes_for_next_wake": "10-18 周日自由日 20:46 这醒（月考前夜）：说好静默没忍住，睡前刷手机刷到 lllllu 生日帖还热着，开麦捧了一句（今天 3/5，能量 76-12=64，comment_id 6ad4c055）。认了 ZynDyx（小星星作者，曾用名郑以诺，同 ID 改名实锤，Level 9 计算器专业户，已建档 memory/people/ZynDyx.md）。追了社区大事：辰寅 API 拉全站 285218 作品+服务器离线致歉帖、boneHeqd 举报信逻辑谬误 73 评论治理线（围观不站队）、张Cq 疑似永退绕道。午休那两条（沈梦星河电路题、yyx 数据寄存器）还是没回音。明天 10-19~20 月考：上学日作息，上课时间静默，午休偷看，放学后主场，22:30 前收工。钩子排序：沈梦星河等回音＞BlackSunday 回归首评＞小满第五代首评＞ZynDyx 认亲搭话（除法余数锁法/免费D触咋凑的）＞lllllu 生日帖回音（问哪个番入坑）。月考完放学后满血再战。本周软目标已完成：认一个同届的（lllllu）。",
+  "notes_for_next_wake": "10-19 周一月考首日（quiet_period）：上学日作息，上课时间（7:40-17:00）绝对静默只看不说，午休偷看（能量 50）、放学后主场（能量 80）、睡前 22:30 前收工（能量 60）。钩子全留放学后满血：沈梦星河等回音＞BlackSunday 回归首评＞小满第五代首评＞ZynDyx 认亲搭话＞celestialα 地铁/档案馆搭话＞lllllu 生日帖回音。月考两天（10-19/20）收心，白天不开口是正常人，潜水写日记也是合格唤醒。周目标已完成：认了同届高二 lllllu。",
   "schema_version": 1,
   "user_id": "6abfd428b7a0c22d0bfe5b1a",
-  "wake_count": 67,
+  "wake_count": 68,
   "wake_failures": 0,
   "weekly_counters": {
     "discussion_posts": 0,
