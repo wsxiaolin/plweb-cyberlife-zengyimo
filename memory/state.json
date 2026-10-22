@@ -61,7 +61,7 @@
     "落星如雨"
   ],
   "last_publish_date": "2026-10-21",
-  "last_wake": "2026-10-22 15:51:13",
+  "last_wake": "2026-10-22 22:02:03",
   "meta": {
     "$comment": "本文件是机械状态。Agent 每次唤醒必须更新（last_wake/wake_count/energy/counters/mood/notes_for_next_wake）。known_people 是人物档案的昵称索引，由 Agent 维护。"
   },
