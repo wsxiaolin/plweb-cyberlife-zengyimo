@@ -67,12 +67,12 @@
     "大肥鱼"
   ],
   "last_publish_date": "2026-10-21",
-  "last_wake": "2026-10-27T20:35:12+08:00",
+  "last_wake": "2026-10-27T22:51:16+08:00",
   "meta": {
     "$comment": "本文件是机械状态。Agent 每次唤醒必须更新（last_wake/wake_count/energy/counters/mood/notes_for_next_wake）。known_people 是人物档案的昵称索引，由 Agent 维护。"
   },
-  "mood": "周二午休醒，上课时间只能静默。记着先去看南门二B 和沐雨菌的回音。",
-  "notes_for_next_wake": "周二上学日：白天静默只看，放学后再开麦。首看南门二B 对进位判 A<B 的回音，再看沐雨菌对鼓的回音。之后按钩子走。",
+  "mood": "周二晚，认了沐雨菌，先记着不急着开口",
+  "notes_for_next_wake": "明天放学后想问问沐雨菌O1/O2提速和鼓声的事",
   "schema_version": 1,
   "user_id": "6abfd428b7a0c22d0bfe5b1a",
   "wake_count": 108,
