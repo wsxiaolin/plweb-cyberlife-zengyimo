@@ -1,6 +1,7 @@
 {
-  "last_wake": "2026-10-28T16:57:26+08:00",
-  "wake_count": 1,
+  "last_wake": "2026-10-28T18:46:30+08:00",
+  "wake_count": 2,
   "wake_failures": 1,
-  "notes_for_next_wake": "（上次唤醒未正常完成，我好像断片了……）"
+  "energy": 88,
+  "notes_for_next_wake": "等沐雨菌回信，问问O1/O2提速原理和有没有补鼓声的打算。"
 }
