@@ -1,6 +1,6 @@
 # API 返回体结构参考
 
-本页以父目录 `physics-lab-turtle-services` 当前的 `BaseController`、`Quantum Models` 和控制器实现为准。接口响应外壳、业务对象和客户端解析方式分开说明。字段以当前模型为依据；不同版本、权限、匿名脱敏、作品类别和空值会让实例略有差异。
+本页说明响应外壳、返回对象与字段，解析时兼容直接数组和$values包装。
 
 ## 1. 通用外壳
 
@@ -142,18 +142,18 @@ Newtonsoft JSON 的 `TypeNameHandling.Auto` 会令某些多态对象或数组带
 
 | 字段 | 含义 |
 |---|---|
-| `ID` | 社区作品摘要 ID；传给 `GetSummary`/`GetExperiment` 时也要按端点要求提供 `Category` 或字段 `ContentID`。 |
+| `ID` | 社区作品摘要ID，传GetSummary的ContentID；GetExperiment必须传下方的保存ContentID，不能传此摘要ID。 |
 | `Category` | 内容类别，如 `Experiment`、`Discussion`、`Model`。 |
 | `Subject` / `LocalizedSubject` | 标题及本地化标题；不能用 `Title` 替代。 |
 | `User` / `Coauthors` | 作者与合作者摘要对象。用户摘要常见 `ID`、`Nickname`、`Signature`、`Avatar`、`AvatarRegion`、`Decoration`、`Verification`。 |
 | `Image` / `ImageRegion` | 封面序号和存储区域，不是图片内容本身。 |
 | `ContentID` | 关联的实验保存 ID；可能为空，和摘要 `ID` 不要混为一谈。 |
 | `Description` / `LocalizedDescription` | 描述段落数组或多语言文本对象；可能因裁剪/本地化策略缺省。 |
-| `Visibility` | 数字枚举：`0` Public、`1` Private、`2` Hidden、`3` Removed；没有权限时作品可能不会返回。 |
+| `Visibility` | 0公开、1作者隐藏、2管理隐藏；删除后可能返回权限错误而不返回摘要。 |
 | `Visits`、`Stars`、`Supports`、`Remixes`、`Comments` | 访问、普通点赞、支持、衍生和评论计数。 |
 | `CreationDate`、`UpdateDate`、`SortingDate` | 模型中的 `long` 时间值；通常是 Unix 毫秒。应检查数据并按毫秒解析，不按 ISO 字符串解析。 |
 
-数组顺序是服务端查询排序结果。接口不返回统一的 `Pages`/`Count` 包装；按当前查询条件用 `Skip`/`Take` 继续翻页。
+数组顺序是服务端查询排序结果。接口不返回统一的 `Pages`/`Count` 包装；作品续页用末条摘要ID作为Query.From、Skip=0并按ID去重；评论用CommentID。不能把不同列表的分页规则互相套用。
 
 ### 4.2 摘要：`Contents/GetSummary`
 
@@ -183,7 +183,7 @@ Newtonsoft JSON 的 `TypeNameHandling.Auto` 会令某些多态对象或数组带
 }
 ```
 
-`Type` 是实验类型枚举：`-1` Unloaded、`0` Circuit、`1` Diagram、`2` Optics、`3` Celestial、`4` Electromagnet、`5` Mechanics。保存内容位于 `StatusSave`、`CameraSave`、`Plots` 等字段，并非 `Data.Content` 字符串。它们可能包含很大的客户端序列化数据；读取后应原样保留未知字段。
+`Type` 常用值：0电路、3天体、4电磁。保存内容位于 `StatusSave`、`CameraSave`、`Plots` 等字段，并非 `Data.Content` 字符串。它们可能包含很大的客户端序列化数据；读取后应原样保留未知字段。
 
 ### 4.4 衍生作品：`Contents/GetDerivatives`
 
@@ -310,7 +310,7 @@ Newtonsoft JSON 的 `TypeNameHandling.Auto` 会令某些多态对象或数组带
 
 `Messages` 是消息条目列表；`Templates` 只在 `Skip == 0` 且 `NoTemplates` 为 false 时加载，否则可能是 `null`。消息正文不是稳定的 `Content` 字段：根据 `TemplateID`，文本替换值放在 `Fields`（字符串字典）和 `Numbers`（数字字典）里。`CategoryID` 是枚举：0 Everything、1 Letter、2 Attention、3 Comment、4 Experiment、5 Management。`Timestamp`、`TimestampInitial` 及读/处理标记是毫秒级 Unix 时间值。
 
-`Unread`、`Handled` 在模型中是 `long` 标记值，不是布尔值或未读条数；读取消息时服务端会更新 `Unread` 标记，处理邀请会把 `Handled` 的待处理标记改成处理时间。业务判断应结合消息类别和客户端约定，不要把这些字段直接当计数。
+`Unread`、`Handled` 在模型中是 `long` 标记值，不是布尔值或未读条数；Unread=0为未读，非零为读取时间戳；读取消息时服务端会更新 `Unread` 标记，处理邀请会把 `Handled` 的待处理标记改成处理时间。业务判断应结合消息类别和客户端约定，不要把这些字段直接当计数。
 
 ## 8. 用户资料页与社区库
 
@@ -361,4 +361,4 @@ if payload.get("Status") != 200:
 experiments = get_items(payload.get("Data"))
 ```
 
-`GetDerivatives`、`GetUser`、`GetMessages`、`GetComments` 返回对象包，不应直接传给 `get_items`；先取 `Data["Experiments"]`、`Data["User"]`、`Data["Messages"]` 或 `Data["Comments"]`，再按实际 JSON 形状解包数组。
+`GetUser`返回的Data.User是单个用户对象，不做数组解包。GetDerivatives的Data.Experiments是分组字典，逐组解包其中数组；GetMessages和GetComments分别取Data.Messages、Data.Comments再解包。

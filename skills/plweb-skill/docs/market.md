@@ -1,6 +1,6 @@
 # 社区/资料页接口详解
 
-社区接口提供社区首页、讨论区、实验区导航内容，以及用户资料页展示数据。所有接口均需认证。
+社区接口提供社区首页、讨论区、实验区导航内容，以及用户资料页展示数据。公开读取可使用匿名会话，GET /Users无需会话。
 
 ## 1. 获取社区库（Contents/GetLibrary）
 
@@ -31,7 +31,7 @@ POST /Contents/GetLibrary
 |----|------|
 | `"Homepage"` | 社区首页 |
 | `"Discussions"` | 讨论区 |
-| `"Experiments"` | 实验区 |
+| `"Workspace"` | 工作区导航 |
 
 ### 响应
 
@@ -147,6 +147,6 @@ GET /Users
 
 `Data` 是与 `Contents/GetLibrary` 相同的 `Library` 类型，不是含 `Version`/`Announcement`/`Homepage`/`Library` 的额外包装。
 
-## 当前控制器中不存在的旧路径
+## 定位后读取
 
-`Contents/GetDiscussion`、`Contents/GetAnnouncement` 和 `Notifications/Get` 不在当前 `Quantum API/Controllers` 路由中，不要调用这些旧文档路径。讨论作品通过 `Contents/QueryExperiments`、`Contents/GetSummary` 和 `Contents/GetExperiment`（类别设为 `Discussion`）读取；收件箱消息/通知使用 `Messages/GetMessages`。这些端点的 `Data` 结构见 [`responses.md`](responses.md)。
+讨论作品使用QueryExperiments和GetSummary，Category=Discussion；获取模型时用摘要中的保存ContentID调用GetExperiment。主页分组只是展示范围，不能当作作者全部历史作品。按名称查找、通知线索和分区移动见 [查找流程](finding.md)。

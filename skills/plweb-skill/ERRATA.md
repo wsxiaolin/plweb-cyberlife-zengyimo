@@ -1,5 +1,11 @@
 # 勘误与实测补充（以本仓库实测为准）
 
+> **2026-11-16 同步**：本目录已更新为上游 NetLogo-Mobile/plweb-skill 最新版本
+> （新增 `docs/by-hand.md` 自行执行指南、`docs/field-notes.md` 实测补充）。
+> 下面各条仍以本仓库实测为准；与上游冲突时按较晚的日期判断。
+> **第 4 节"全程需要 ssl 关闭证书校验"已于 2026-11-16 复测失效**——
+> 两个 API 域证书链校验通过（TLSv1.3），保持校验开启即可，见 `docs/field-notes.md` §7。
+
 > 本目录文档复制自 [NetLogo-Mobile/plweb-skill](https://github.com/NetLogo-Mobile/plweb-skill)，
 > 是社区 API 的官方技能文档。以下是本仓库（plweb-cyberlife）在 2026-09-25 实测中发现的
 > 与文档不一致之处。**Agent 优先按本勘误行事。**

@@ -9,7 +9,7 @@ POST https://physics-api-cn.turtlesim.com/Users/Authenticate
 Content-Type: application/json
 ```
 
-外层返回结构以及登录 `Data` 中 `User`、`Statistic`、`Backpack`、`Library` 等字段说明见 [`responses.md`](responses.md#3-登录-usersauthenticate)。
+外层返回结构以及登录 `Data` 中 `User`、`Statistic`、`Backpack`、`Library` 等字段说明见 [`responses.md`](responses.md#3-登录usersauthenticate)。
 
 ## 1. 邮箱登录
 
@@ -21,8 +21,8 @@ Content-Type: application/json
 |------|------|------|------|
 | `Login` | string | 是 | 用户注册邮箱 |
 | `Password` | string | 是 | 用户密码 |
-| `Version` | int | 是 | 客户端版本号，格式 `YYMM`，如 `2411` |
-| `Device.Identifier` | string | 是 | 设备标识符，可使用固定值 `7db01528cf13e2199e141c402d79190e` |
+| `Version` | int | 是 | 认证请求版本，随附实现固定为2411 |
+| `Device.Identifier` | string | 是 | 设备标识符，可使用固定值 `0d1a760b44023875d2123f2cfcb56dad` |
 | `Device.Language` | string | 是 | 设备语言，`"Chinese"` 或 `"English"` |
 
 ### 请求示例
@@ -31,9 +31,9 @@ Content-Type: application/json
 {
   "Login": "user@example.com",
   "Password": "mypassword",
-  "Version": 2609,
+  "Version": 2411,
   "Device": {
-    "Identifier": "7db01528cf13e2199e141c402d79190e",
+    "Identifier": "0d1a760b44023875d2123f2cfcb56dad",
     "Language": "Chinese"
   }
 }
@@ -92,9 +92,9 @@ Content-Type: application/json
 {
   "Login": null,
   "Password": null,
-  "Version": 2609,
+  "Version": 2411,
   "Device": {
-    "Identifier": "7db01528cf13e2199e141c402d79190e",
+    "Identifier": "0d1a760b44023875d2123f2cfcb56dad",
     "Language": "Chinese"
   }
 }
@@ -121,9 +121,9 @@ x-API-AuthCode: <已获取的AuthCode>
 {
   "Login": null,
   "Password": null,
-  "Version": 2609,
+  "Version": 2411,
   "Device": {
-    "Identifier": "7db01528cf13e2199e141c402d79190e",
+    "Identifier": "0d1a760b44023875d2123f2cfcb56dad",
     "Language": "Chinese"
   }
 }
@@ -163,11 +163,8 @@ x-API-AuthCode: <AuthCode>
 | `Verification` | string/null | 认证信息 |
 | `IsBinded` | bool | 是否已绑定邮箱 |
 
-## Version 字段说明
+## 协议版本
 
-`Version` 字段对应物理实验室客户端版本整数，常见格式为 `YYMM`：
+随附实现使用请求体 `Version=2411`，普通API请求头 `x-API-Version: 2502`。它们是不同协议字段，不按当前日期递增，也不要求读取其他应用的版本。需要改变时应以明确的兼容协议为依据。
 
-- 示例值应与调用方实际客户端版本一致；下面的历史值仅用于识别格式，不作为建议默认值。
-- `2406` — 2024 年 6 月版本
-
-不要反复猜测版本号或把历史示例当作长期可用默认值。对接现有客户端时读取其实际版本；自建调用方应按服务端兼容约定设置，并在错误响应中检查 `Message`。
+本页展示HTTP字段结构；实际登录和持久会话由 [login_gui.py](local-login.md) 及CommunityClient处理。

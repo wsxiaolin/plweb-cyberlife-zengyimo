@@ -50,11 +50,11 @@ POST /Contents/QueryExperiments
 | `ParentID` | string/null | 筛选特定父作品 ID（获取衍生作品时用） |
 | `UserID` | string/null | 筛选特定用户的作品 |
 | `Special` | string/null | 特殊筛选 |
-| `From` | string/null | 起始内容 ID（游标分页） |
-| `Skip` | int | 跳过条数（偏移分页） |
+| `From` | string/null | 首页null；续页传末条摘要ID。不可直接传毫秒或ISO时间；边界按ID去重 |
+| `Skip` | int | 保持0；当前中国区传条数偏移会重复第一页 |
 | `Take` | int | 获取条数（默认 16） |
 | `Days` | int | 时间范围（天数，0 表示不限） |
-| `Sort` | int | 排序方式：`0` 最新，`1` 最热 |
+| `Sort` | int | 0默认、1热门、2随机 |
 | `ShowAnnouncement` | bool | 是否显示公告 |
 
 ### 响应
@@ -125,7 +125,7 @@ POST /Contents/GetExperiment
 }
 ```
 
-这里的 `ContentID` 是 `ExperimentSummary.ContentID` 保存 ID，不是作品摘要的 `ID`。成功时 `Data` 是单个 `Experiment` 保存对象，字段为 `ID`、`Type`、`Components`、`Subject`、`StatusSave`、`CameraSave`、`Version`、`CreationDate`、`Paused`、`Summary`、`Plots`。其中 `StatusSave`/`CameraSave` 是客户端保存数据，不是 `Content` 字符串。字段解释和样例见 [`responses.md`](responses.md#43-完整保存-contentsgetexperiment)。
+这里的 `ContentID` 是 `ExperimentSummary.ContentID` 保存 ID，不是作品摘要的 `ID`。成功时 `Data` 是单个 `Experiment` 保存对象，字段为 `ID`、`Type`、`Components`、`Subject`、`StatusSave`、`CameraSave`、`Version`、`CreationDate`、`Paused`、`Summary`、`Plots`。其中 `StatusSave`/`CameraSave` 是客户端保存数据，不是 `Content` 字符串。字段解释和样例见 [`responses.md`](responses.md#43-完整保存contentsgetexperiment)。
 
 ## 3. 获取实验摘要（Contents/GetSummary）
 
@@ -147,12 +147,12 @@ POST /Contents/GetSummary
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `ContentID` | string | 内容 ID |
+| `ContentID` | string | 作品摘要ID |
 | `Category` | string | `"Experiment"` 或 `"Discussion"` |
 
 ### 响应
 
-成功时 `Data` 是一个 `ExperimentSummary` 对象（直接对象，不是 `Data.Summary` 包装）。请求使用 `ContentID`；其返回字段与列表元素相同，见 [`responses.md`](responses.md#42-摘要-contentsgetsummary)。
+成功时 `Data` 是一个 `ExperimentSummary` 对象（直接对象，不是 `Data.Summary` 包装）。请求使用 `ContentID`；其返回字段与列表元素相同，见 [`responses.md`](responses.md#42-摘要contentsgetsummary)。
 
 ## 4. 获取衍生作品（Contents/GetDerivatives）
 
@@ -174,7 +174,7 @@ POST /Contents/GetDerivatives
 
 ### 响应
 
-`Data` 是 `ContentPackage`：主要包含 `Experiments` 分组字典、`Summary`（仅 `WithSummary=true` 时填充）、`Parent`、`Model`、`Supporters` 和 `Survey`。见 [`responses.md`](responses.md#44-衍生作品-contentsgetderivatives)。
+`Data` 是 `ContentPackage`：主要包含 `Experiments` 分组字典、`Summary`（仅 `WithSummary=true` 时填充）、`Parent`、`Model`、`Supporters` 和 `Survey`。见 [`responses.md`](responses.md#44-衍生作品contentsgetderivatives)。
 
 ## 5. 获取支持者列表（Contents/GetSupporters）
 
@@ -198,14 +198,14 @@ POST /Contents/GetSupporters
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `ContentID` | string | 内容 ID（必填） |
+| `ContentID` | string | 作品摘要ID（必填） |
 | `Category` | string | `"Experiment"` 或 `"Discussion"` |
 | `Skip` | int | 跳过条数 |
 | `Take` | int | 获取条数 |
 
 ### 响应
 
-`Data` 是 `UserSummary[]`（可能直接数组或 `$values` 包装），每项是 `ID`、`Nickname`、`Signature`、`Avatar`、`AvatarRegion`、`Decoration`、`Verification` 等简表字段。不是 `{Supporters: [...]}` 包装。更多说明见 [`responses.md`](responses.md#45-支持者-contentsgetsupporters)。
+`Data` 是 `UserSummary[]`（可能直接数组或 `$values` 包装），每项是 `ID`、`Nickname`、`Signature`、`Avatar`、`AvatarRegion`、`Decoration`、`Verification` 等简表字段。不是 `{Supporters: [...]}` 包装。更多说明见 [`responses.md`](responses.md#45-支持者contentsgetsupporters)。
 
 ## 6. 点赞/取消点赞（Contents/StarContent）
 
@@ -229,7 +229,7 @@ POST /Contents/StarContent
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `ContentID` | string | 内容 ID |
+| `ContentID` | string | 作品摘要ID |
 | `Category` | string | `"Experiment"` 或 `"Discussion"` |
 | `Status` | bool | `true` 点赞，`false` 取消点赞 |
 | `Type` | int | `0` 普通点赞，`1` 支持（需要绑定账号及足够金币） |
@@ -248,19 +248,19 @@ POST /Contents/RemoveExperiment
 ```json
 {
   "SummaryID": "16a627bdb25f77131ba28018",
-  "Category": "Experiment"
+  "Category": "Experiment",
+  "Hiding": false,
+  "Reason": ""
 }
 ```
 
+Hiding=false从服务器删除自己的作品；true为隐藏，恢复仅适用于隐藏。见 [权限](permissions.md)。
+
 ## 8. 确认作品封面（Contents/ConfirmExperiment）
 
-当前服务端没有 `Contents/UploadImage` 路由。`ConfirmExperiment` 接受 `SummaryID`、`Category` 和 `Image`；需要上传新文件时，还会读取请求中的二进制文件与 `Extension`，这不是把 Base64 图片放进 JSON 的接口。上传协议依赖客户端封装，调用前应核对 `ContentController.ConfirmExperiment` 与 `BaseController.UploadStorage`，不要照搬旧的 `UploadImage` 示例。
+`ConfirmExperiment`只确认已经上传并核验的图片序号，不负责传图片文件。请求体为 `{Category,SummaryID,Image,Extension:".jpg"}`。
 
-```http
-POST /Contents/ConfirmExperiment
-```
-
-JSON 元数据至少包括 `SummaryID`（24 位作品 ID）、`Category`（如 `Experiment`）和 `Image`（图片序号）；仅作者或有权限的管理账号可以更新封面。
+使用 `CommunityActions.set_cover` 或插件 `upload_cover` 完成申请凭据、实际上传、CDN图片核验、确认和摘要读回。不要先递增Image再申请上传凭据；完整顺序见 [封面上传](uploads.md#封面)。
 
 ## 9. 获取用户资料页（Contents/GetProfile）
 
@@ -305,7 +305,7 @@ POST /Contents/GetProfile
 
 `Data.Experiments` 包含六个分类列表：精选讨论、热门讨论、最新讨论、精选实验、热门实验、最新实验。
 
-## 11. 获取社区库内容（Contents/GetLibrary）
+## 10. 获取社区库内容（Contents/GetLibrary）
 
 获取社区首页、讨论区、实验区等导航与板块内容。
 
@@ -325,9 +325,15 @@ POST /Contents/GetLibrary
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `Identifier` | string | `"Homepage"` 首页，`"Discussions"` 讨论区，`"Experiments"` 实验区 ,`Workspace` 工作区 |
+| `Identifier` | string | `"Homepage"` 首页，`"Discussions"` 讨论区，`"Workspace"` 工作区 |
 | `Language` | string | `"Chinese"` 或 `"English"` |
 
 ### 响应
 
 返回社区库的板块结构，包含导航分类、板块列表等信息。
+
+## 执行辅助与补充接口
+
+作品列表优先使用 [fetch_works](operations.md)，读取实验先用 [大实验概览](large-experiments.md)，不要打印完整StatusSave。
+
+新建模型、封面上传与读回由CommunityActions.publish或publish_experiment完成。既有作品文字/标签编辑、GetWorkspace、MoveCategory、IsStarred、RestoreExperiment参数见 [补充接口](practical-api.md)。隐藏与删除的区别见 [权限与结果](permissions.md)。
